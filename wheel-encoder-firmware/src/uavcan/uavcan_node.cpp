@@ -29,24 +29,6 @@ static int uavcan_node_start(Node& node)
     return node.start();
 }
 
-/** Start all UAVCAN services. */
-static void uavcan_services_start(Node& node)
-{
-    const struct {
-        int (*start)(Node&);
-        const char* name;
-    } services[] = {
-        // {Wheel_encoder_start, "WheelEncoder"},
-        {NULL, NULL} /* Must be last */
-    };
-
-    for (int i = 0; services[i].start; i++) {
-        if (services[i].start(node) < 0) {
-            uavcan_failure(services[i].name);
-        }
-    }
-}
-
 static THD_WORKING_AREA(uavcan_node_wa, 8000);
 static THD_FUNCTION(uavcan_node, arg)
 {
@@ -75,9 +57,6 @@ static THD_FUNCTION(uavcan_node, arg)
 
     node.getNodeStatusProvider().setModeInitialization();
 
-    /* Start wheel encoder services */
-    uavcan_services_start(node);
-
     /* Spin forever */
     while (true) {
         int res = node.spin(uavcan::MonotonicDuration::fromMSec(1000 / UAVCAN_SPIN_FREQUENCY));
@@ -91,7 +70,7 @@ static THD_FUNCTION(uavcan_node, arg)
             node.getNodeStatusProvider().setHealthOk();
         }
 
-        // wheel_encoder_spin(node);
+        wheel_encoder_publish(node);
     }
 }
 
