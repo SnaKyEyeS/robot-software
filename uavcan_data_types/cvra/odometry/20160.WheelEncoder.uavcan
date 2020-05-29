@@ -2,5 +2,5 @@
 # Differential base Encoder Position
 #
 
-uint16 left_encoder_raw
-uint16 right_encoder_raw
+int32 left_encoder_raw
+int32 right_encoder_raw
