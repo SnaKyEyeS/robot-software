@@ -35,8 +35,7 @@
 using namespace std::chrono_literals;
 
 void init_base_motors(void);
-void init_arm_motors(void);
-void init_sensor_nodes(void);
+void init_actuators();
 
 motor_manager_t motor_manager;
 
@@ -125,6 +124,7 @@ int main(int argc, char** argv)
 
     /* Initialize motors */
     init_base_motors();
+    init_actuators();
 
     /* Initiaze UAVCAN communication */
 
@@ -169,4 +169,28 @@ void init_base_motors(void)
 {
     motor_manager_create_driver(&motor_manager, "left-wheel");
     motor_manager_create_driver(&motor_manager, "right-wheel");
+}
+
+parameter_namespace_t actuators_ns;
+
+actuator_driver_t actuator_front_left, actuator_front_center, actuator_front_right;
+actuator_driver_t actuator_back_left, actuator_back_center, actuator_back_right;
+
+void init_actuators()
+{
+    parameter_namespace_declare(&actuators_ns, &global_config, "actuators");
+
+    actuator_driver_init(&actuator_front_left,
+                         &bus_enumerator, &actuators_ns, "actuator-front-left");
+    actuator_driver_init(&actuator_front_center,
+                         &bus_enumerator, &actuators_ns, "actuator-front-center");
+    actuator_driver_init(&actuator_front_right,
+                         &bus_enumerator, &actuators_ns, "actuator-front-right");
+
+    actuator_driver_init(&actuator_back_left,
+                         &bus_enumerator, &actuators_ns, "actuator-back-left");
+    actuator_driver_init(&actuator_back_center,
+                         &bus_enumerator, &actuators_ns, "actuator-back-center");
+    actuator_driver_init(&actuator_back_right,
+                         &bus_enumerator, &actuators_ns, "actuator-back-right");
 }

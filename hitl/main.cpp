@@ -7,6 +7,7 @@
 #include "absl/flags/parse.h"
 #include "absl/flags/usage.h"
 #include "motor_board_emulator.h"
+#include "actuator_board_emulator.h"
 #include "wheel_encoders_emulator.h"
 #include <error/error.h>
 #include "logging.h"
@@ -28,10 +29,12 @@ int main(int argc, char** argv)
     UavcanMotorEmulator left_motor(iface, "left-wheel", board_id++);
     UavcanMotorEmulator right_motor(iface, "right-wheel", board_id++);
     WheelEncoderEmulator wheels(iface, "encoders", board_id++);
+    ActuatorBoardEmulator front_left(iface, "actuator-front-left", board_id++);
 
     right_motor.start();
     left_motor.start();
     wheels.start();
+    front_left.start();
 
     float left = 0.f, right = 0.f;
     while (true) {
