@@ -25,6 +25,7 @@ ActuatorBoardEmulator::ActuatorBoardEmulator(std::string can_iface, std::string 
         }
 
         // TODO: Do something with the message
+        NOTICE("arm position: %.3f", msg.servo_trajectories[0].position);
     });
 }
 
