@@ -57,6 +57,8 @@ static THD_FUNCTION(uavcan_node, arg)
 
     node.getNodeStatusProvider().setModeInitialization();
 
+    wheel_encoder_init(node);
+
     /* Spin forever */
     while (true) {
         int res = node.spin(uavcan::MonotonicDuration::fromMSec(1000 / UAVCAN_SPIN_FREQUENCY));
@@ -70,7 +72,6 @@ static THD_FUNCTION(uavcan_node, arg)
             node.getNodeStatusProvider().setHealthOk();
         }
 
-        wheel_encoder_publish(node);
     }
 }
 
