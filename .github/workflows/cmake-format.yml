@@ -1,0 +1,11 @@
+on: push
+name: cmake-format
+jobs:
+  lint:
+    name: cmake-format
+    runs-on: ubuntu-latest
+    steps:
+    - name: cmake-format
+      uses: cvra/cmake-format-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
