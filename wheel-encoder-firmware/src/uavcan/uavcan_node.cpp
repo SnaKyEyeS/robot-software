@@ -71,7 +71,6 @@ static THD_FUNCTION(uavcan_node, arg)
             node.getNodeStatusProvider().setModeOperational();
             node.getNodeStatusProvider().setHealthOk();
         }
-
     }
 }
 
