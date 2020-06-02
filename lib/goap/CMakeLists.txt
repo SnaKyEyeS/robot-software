@@ -1,7 +1,10 @@
-add_library(goap INTERFACE)
-target_include_directories(goap INTERFACE include)
+add_library(goap interface)
+target_include_directories(goap interface include)
 
-cvra_add_test(TARGET goap_test SOURCES
+cvra_add_test(
+    TARGET
+    goap_test
+    SOURCES
     tests/goap_internals.cpp
     tests/goap_test.cpp
     DEPENDENCIES

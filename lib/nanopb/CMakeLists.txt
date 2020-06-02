@@ -1,7 +1,3 @@
-add_library(nanopb
-    nanopb/pb_common.c
-    nanopb/pb_decode.c
-    nanopb/pb_encode.c
-)
+add_library(nanopb nanopb/pb_common.c nanopb/pb_decode.c nanopb/pb_encode.c)
 
-target_include_directories(nanopb PUBLIC nanopb)
+target_include_directories(nanopb public nanopb)

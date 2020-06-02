@@ -1,4 +1,4 @@
-find_package(SDL2 REQUIRED)
+find_package(SDL2 required)
 
 add_definitions(-DGFX_OS_PRE_INIT_FUNCTION=sdl_driver_init)
 add_definitions(-DGDISP_SCREEN_WIDTH=480)
@@ -63,28 +63,27 @@ set(SOURCES
     ${UGFX}/drivers/multiple/SDL/gdisp_lld_SDL.c
 )
 
-if (APPLE) # MacOS
+if(APPLE) # MacOS
     set(SOURCES ${SOURCES} ${UGFX}/src/gos/gos_osx.c)
-elseif (UNIX) # Linux
+elseif(UNIX) # Linux
     set(SOURCES ${SOURCES} ${UGFX}/src/gos/gos_linux.c)
 else()
-    message(FATAL_ERROR "Supported platforms: Linux and MacOS")
+    message(fatal_error "Supported platforms: Linux and MacOS")
 endif()
 
 add_library(ugfx ${SOURCES})
 
-target_include_directories(ugfx PUBLIC ${UGFX} ${UGFX}/src ${UGFX}/drivers/multiple/SDL)
+target_include_directories(ugfx public ${UGFX} ${UGFX}/src ${UGFX}/drivers/multiple/SDL)
 target_link_libraries(ugfx ${SDL2_LIBRARY})
-target_include_directories(ugfx PUBLIC ${SDL2_INCLUDE_DIR})
+target_include_directories(ugfx public ${SDL2_INCLUDE_DIR})
 
 # Defined in other projects
 target_link_libraries(ugfx gfxconf)
 
 if(APPLE)
-    target_compile_definitions(ugfx PUBLIC "GFX_USE_OS_OSX=GFXON")
-elseif (UNIX) # Linux
-    target_compile_definitions(ugfx PUBLIC "GFX_USE_OS_LINUX=GFXON")
+    target_compile_definitions(ugfx public "GFX_USE_OS_OSX=GFXON")
+elseif(UNIX) # Linux
+    target_compile_definitions(ugfx public "GFX_USE_OS_LINUX=GFXON")
 else()
-    message(FATAL_ERROR "Supported platforms: Linux and MacOS and ChibiOS")
+    message(fatal_error "Supported platforms: Linux and MacOS and ChibiOS")
 endif()
-

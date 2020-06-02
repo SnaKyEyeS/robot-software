@@ -1,17 +1,16 @@
-find_package (Threads)
-add_library(msgbus
-    messagebus.c
-)
+find_package(Threads)
+add_library(msgbus messagebus.c)
 
-target_include_directories(msgbus PUBLIC include)
+target_include_directories(msgbus public include)
 
-add_library(msgbus_mocks_synchronization
-    tests/mocks/synchronization.cpp
-)
+add_library(msgbus_mocks_synchronization tests/mocks/synchronization.cpp)
 
 target_link_libraries(msgbus_mocks_synchronization msgbus)
 
-cvra_add_test(TARGET msgbus_test SOURCES
+cvra_add_test(
+    TARGET
+    msgbus_test
+    SOURCES
     tests/atomicity.cpp
     tests/msgbus.cpp
     tests/signaling.cpp
@@ -24,41 +23,20 @@ cvra_add_test(TARGET msgbus_test SOURCES
     msgbus_mocks_synchronization
 )
 
-add_library(msgbus_posix
-    examples/posix/port.c
-)
+add_library(msgbus_posix examples/posix/port.c)
 
-target_link_libraries(msgbus_posix
-   msgbus
-   Threads::Threads
-)
+target_link_libraries(msgbus_posix msgbus Threads::Threads)
 
-target_include_directories(msgbus_posix
-    PUBLIC
-    examples/posix/include
-)
+target_include_directories(msgbus_posix public examples/posix/include)
 
-add_executable(msgbus_demo
-    examples/posix/demo.c
-)
-target_link_libraries(msgbus_demo
-    msgbus
-    msgbus_posix
-)
+add_executable(msgbus_demo examples/posix/demo.c)
+target_link_libraries(msgbus_demo msgbus msgbus_posix)
 
-add_executable(msgbus_demo_watchgroups
-    examples/posix/demo_watchgroups.c
-)
+add_executable(msgbus_demo_watchgroups examples/posix/demo_watchgroups.c)
 
-target_link_libraries(msgbus_demo_watchgroups 
-    msgbus
-    msgbus_posix
-)
+target_link_libraries(msgbus_demo_watchgroups msgbus msgbus_posix)
 
 if(${CMAKE_CROSSCOMPILING})
-    add_library(msgbus_chibios
-        examples/chibios/port.c
-    )
+    add_library(msgbus_chibios examples/chibios/port.c)
     target_link_libraries(msgbus_chibios msgbus chibios)
 endif()
-

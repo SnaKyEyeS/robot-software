@@ -1,10 +1,7 @@
-add_executable(motor_board_emulator
-    main.cpp
-    motor_board_emulator.cpp
-    wheel_encoders_emulator.cpp
-)
+add_executable(motor_board_emulator main.cpp motor_board_emulator.cpp wheel_encoders_emulator.cpp)
 
-target_link_libraries(motor_board_emulator
+target_link_libraries(
+    motor_board_emulator
     absl::flags
     absl::flags_parse
     hitl_logging
@@ -13,21 +10,14 @@ target_link_libraries(motor_board_emulator
     uavcan_linux
 )
 
-add_library(hitl_logging
-    logging.cpp
-    logging.h
-)
+add_library(hitl_logging logging.cpp logging.h)
 
-target_link_libraries(hitl_logging
-    absl::flags
-    error
-)
+target_link_libraries(hitl_logging absl::flags error)
 
-add_executable(voltage_injector
-    voltage_injector.cpp
-)
+add_executable(voltage_injector voltage_injector.cpp)
 
-target_link_libraries(voltage_injector
+target_link_libraries(
+    voltage_injector
     absl::flags
     absl::flags_parse
     hitl_logging

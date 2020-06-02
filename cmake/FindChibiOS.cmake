@@ -1,11 +1,9 @@
-MESSAGE(STATUS "Chibios version:" ${ChibiOS_FIND_VERSION_MAJOR})
+message(status "Chibios version:" ${ChibiOS_FIND_VERSION_MAJOR})
 
-INCLUDE(ChibiOS/18.2/ChibiOS)
+include(ChibiOS/18.2/ChibiOS)
 
-LIST(REMOVE_DUPLICATES ChibiOS_INCLUDE_DIRS)
-LIST(REMOVE_DUPLICATES ChibiOS_SOURCES)
+list(remove_duplicates ChibiOS_INCLUDE_DIRS)
+list(remove_duplicates ChibiOS_SOURCES)
 
-INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ChibiOS DEFAULT_MSG ChibiOS_SOURCES ChibiOS_INCLUDE_DIRS)
-
-
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(ChibiOS DEFAULT_MSG ChibiOS_SOURCES ChibiOS_INCLUDE_DIRS)

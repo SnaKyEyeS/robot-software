@@ -7,43 +7,47 @@ set(DSDLC_OUTPUT ${CMAKE_BINARY_DIR}/dsdlc_generated)
 
 # Build list of UAVCAN inputs and outputs
 execute_process(
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/list_uavcan_dsdl.py ${DSDLC_INPUTS}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT_VARIABLE UAVCAN_FILES
-    RESULT_VARIABLE RETURN_VALUE
+    command ${CMAKE_CURRENT_SOURCE_DIR}/list_uavcan_dsdl.py ${DSDLC_INPUTS}
+    working_directory ${CMAKE_CURRENT_SOURCE_DIR}
+    output_variable UAVCAN_FILES
+    result_variable RETURN_VALUE
 )
-if (NOT RETURN_VALUE EQUAL 0)
-    message(FATAL_ERROR "Failed to get the dependencies (error ${RETURN_VALUE})")
+if(not RETURN_VALUE equal 0)
+    message(fatal_error "Failed to get the dependencies (error ${RETURN_VALUE})")
 endif()
 
 execute_process(
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/list_uavcan_dsdl.py ${DSDLC_INPUTS} --output-dir ${DSDLC_OUTPUT}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT_VARIABLE UAVCAN_HEADERS
-    RESULT_VARIABLE RETURN_VALUE
+    command ${CMAKE_CURRENT_SOURCE_DIR}/list_uavcan_dsdl.py ${DSDLC_INPUTS} --output-dir
+            ${DSDLC_OUTPUT}
+    working_directory ${CMAKE_CURRENT_SOURCE_DIR}
+    output_variable UAVCAN_HEADERS
+    result_variable RETURN_VALUE
 )
-if (NOT RETURN_VALUE EQUAL 0)
-    message(FATAL_ERROR "Failed to get the dependencies (error ${RETURN_VALUE})")
+if(not RETURN_VALUE equal 0)
+    message(fatal_error "Failed to get the dependencies (error ${RETURN_VALUE})")
 endif()
 
-message(STATUS "Found the following UAVCAN files...")
+message(status "Found the following UAVCAN files...")
 foreach(F ${UAVCAN_FILES})
-    message(STATUS ${F})
+    message(status ${F})
 endforeach()
 
-message(STATUS "Which generate the following headers...")
+message(status "Which generate the following headers...")
 foreach(F ${UAVCAN_HEADERS})
-    message(STATUS ${F})
+    message(status ${F})
 endforeach()
 
+add_custom_command(
+    command ${PYTHON} uavcan/libuavcan/dsdl_compiler/libuavcan_dsdlc ${DSDLC_INPUTS}
+            -O${DSDLC_OUTPUT}
+    output ${UAVCAN_HEADERS}
+    depends ${UAVCAN_FILES}
+    working_directory ${CMAKE_CURRENT_SOURCE_DIR}
+    comment "Running dsdl compiler"
+)
 
-add_custom_command(COMMAND ${PYTHON} uavcan/libuavcan/dsdl_compiler/libuavcan_dsdlc ${DSDLC_INPUTS} -O${DSDLC_OUTPUT}
-    OUTPUT ${UAVCAN_HEADERS}
-    DEPENDS ${UAVCAN_FILES}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Running dsdl compiler")
-
-add_library(uavcan
+add_library(
+    uavcan
     uavcan/libuavcan/src/driver/uc_can.cpp
     uavcan/libuavcan/src/marshal/uc_bit_array_copy.cpp
     uavcan/libuavcan/src/marshal/uc_bit_stream.cpp
@@ -74,21 +78,26 @@ add_library(uavcan
     ${UAVCAN_HEADERS}
 )
 
-target_include_directories(uavcan PUBLIC uavcan/libuavcan/include)
-target_compile_definitions(uavcan PUBLIC "UAVCAN_CPP_VERSION=UAVCAN_CPP11;UAVCAN_TOSTRING=0;UAVCAN_DEBUG=0")
-target_include_directories(uavcan PUBLIC ${DSDLC_OUTPUT})
+target_include_directories(uavcan public uavcan/libuavcan/include)
+target_compile_definitions(
+    uavcan public "UAVCAN_CPP_VERSION=UAVCAN_CPP11;UAVCAN_TOSTRING=0;UAVCAN_DEBUG=0"
+)
+target_include_directories(uavcan public ${DSDLC_OUTPUT})
 
-add_library(uavcan_linux INTERFACE)
-target_include_directories(uavcan_linux INTERFACE uavcan/libuavcan_drivers/linux/include)
+add_library(uavcan_linux interface)
+target_include_directories(uavcan_linux interface uavcan/libuavcan_drivers/linux/include)
 
-if (${CMAKE_CROSSCOMPILING})
-    add_library(uavcan_stm32
+if(${CMAKE_CROSSCOMPILING})
+    add_library(
+        uavcan_stm32
         uavcan/libuavcan_drivers/stm32/driver/src/uc_stm32_clock.cpp
         uavcan/libuavcan_drivers/stm32/driver/src/uc_stm32_can.cpp
         uavcan/libuavcan_drivers/stm32/driver/src/uc_stm32_thread.cpp
     )
-    target_include_directories(uavcan_stm32 PUBLIC uavcan/libuavcan_drivers/stm32/driver/include)
-    target_compile_definitions(uavcan_stm32 PUBLIC "UAVCAN_STM32_CHIBIOS=1;UAVCAN_STM32_NUM_IFACES=1")
+    target_include_directories(uavcan_stm32 public uavcan/libuavcan_drivers/stm32/driver/include)
+    target_compile_definitions(
+        uavcan_stm32 public "UAVCAN_STM32_CHIBIOS=1;UAVCAN_STM32_NUM_IFACES=1"
+    )
 
     target_link_libraries(uavcan_stm32 uavcan chibios)
 endif()
@@ -116,6 +125,5 @@ add_subdirectory(timestamp)
 add_subdirectory(trace)
 add_subdirectory(version)
 
-add_library(Eigen INTERFACE)
-target_include_directories(Eigen INTERFACE eigen/)
-
+add_library(Eigen interface)
+target_include_directories(Eigen interface eigen/)

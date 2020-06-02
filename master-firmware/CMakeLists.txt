@@ -1,5 +1,6 @@
 find_package(Threads)
-add_library(master_lib
+add_library(
+    master_lib
     src/unix_timestamp.c
     src/can/bus_enumerator.c
     src/math/lie_groups.c
@@ -11,9 +12,10 @@ add_library(master_lib
     src/msgbus_protobuf.c
 )
 
-target_include_directories(master_lib PUBLIC src)
+target_include_directories(master_lib public src)
 
-target_link_libraries(master_lib
+target_link_libraries(
+    master_lib
     aversive
     pid
     msgbus
@@ -23,7 +25,9 @@ target_link_libraries(master_lib
     goap
 )
 
-cvra_add_test(TARGET master_test
+cvra_add_test(
+    TARGET
+    master_test
     SOURCES
     tests/unix-timestamp.cpp
     tests/bus_enumerator.cpp
@@ -35,12 +39,9 @@ cvra_add_test(TARGET master_test
     tests/test_strategy.cpp
     tests/strategy/test_score.cpp
     tests/msgbus_protobuf.cpp
-    # TODO: The following tests depend on injecting a fake ch.h which is harder
-    # to do using CMake, so they should be refactored not to depend on it.
-    # tests/ch.cpp
-    # tests/test_strategy_helpers.cpp
-    # tests/test_trajectory_helpers.cpp
-    # tests/test_map.cpp
+    # TODO: The following tests depend on injecting a fake ch.h which is harder to do using CMake,
+    # so they should be refactored not to depend on it. tests/ch.cpp tests/test_strategy_helpers.cpp
+    # tests/test_trajectory_helpers.cpp tests/test_map.cpp
     DEPENDENCIES
     master_lib
     msgbus
@@ -61,99 +62,86 @@ set(PROTOSRC
 )
 
 # Generater .pb.c filenames from .proto filenames
-foreach (F ${PROTOSRC})
-    get_filename_component(basename ${F} NAME_WE)
-    list(APPEND PROTOCSRC ${CMAKE_BINARY_DIR}/protobuf/protobuf/${basename}.pb.c)
+foreach(F ${PROTOSRC})
+    get_filename_component(basename ${F} name_we)
+    list(append PROTOCSRC ${CMAKE_BINARY_DIR}/protobuf/protobuf/${basename}.pb.c)
 endforeach()
 
 add_custom_target(protoc)
 
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/protobuf/protobuf/)
+file(make_directory ${CMAKE_BINARY_DIR}/protobuf/protobuf/)
 
 add_custom_command(
-    COMMAND protoc
-        --plugin=protoc-gen-nanopb=../lib/nanopb/nanopb/generator/protoc-gen-nanopb
-        --python_out=${CMAKE_BINARY_DIR}/protobuf
-		-I ../lib/nanopb/nanopb/generator/proto
-		-I protobuf/
-        --nanopb_out=${CMAKE_BINARY_DIR}/protobuf/protobuf
-        ${PROTOSRC}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT ${PROTOCSRC}
-    COMMENT "Running protobuf compiler..."
-    DEPENDS ${PROTOSRC}
+    command
+        protoc --plugin=protoc-gen-nanopb=../lib/nanopb/nanopb/generator/protoc-gen-nanopb
+        --python_out=${CMAKE_BINARY_DIR}/protobuf -I ../lib/nanopb/nanopb/generator/proto -I
+        protobuf/ --nanopb_out=${CMAKE_BINARY_DIR}/protobuf/protobuf ${PROTOSRC}
+    working_directory ${CMAKE_CURRENT_SOURCE_DIR}
+    output ${PROTOCSRC}
+    comment "Running protobuf compiler..."
+    depends ${PROTOSRC}
 )
 
-add_library(master_proto
-    ${PROTOCSRC}
-)
+add_library(master_proto ${PROTOCSRC})
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/config_private/)
+file(make_directory ${CMAKE_CURRENT_BINARY_DIR}/config_private/)
 add_custom_command(
-    COMMAND ../tools/config/config_to_c.py
-    ../config_order.yaml
-    ../config_chaos.yaml
-    ${CMAKE_CURRENT_BINARY_DIR}/config_private/config_private.h
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/config_private/config_private.h
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Generating config structure"
-    DEPENDS ../config_order.yaml ../config_chaos.yaml
+    command ../tools/config/config_to_c.py ../config_order.yaml ../config_chaos.yaml
+            ${CMAKE_CURRENT_BINARY_DIR}/config_private/config_private.h
+    output ${CMAKE_CURRENT_BINARY_DIR}/config_private/config_private.h
+    working_directory ${CMAKE_CURRENT_SOURCE_DIR}
+    comment "Generating config structure"
+    depends ../config_order.yaml ../config_chaos.yaml
 )
 
-add_custom_target(master_config_header ALL DEPENDS
-    ${CMAKE_CURRENT_BINARY_DIR}/config_private/config_private.h
+add_custom_target(
+    master_config_header all depends ${CMAKE_CURRENT_BINARY_DIR}/config_private/config_private.h
 )
 
-add_library(master_config_structure INTERFACE)
+add_library(master_config_structure interface)
 
-target_include_directories(master_config_structure INTERFACE
-    ${CMAKE_CURRENT_BINARY_DIR}/config_private/
+target_include_directories(
+    master_config_structure interface ${CMAKE_CURRENT_BINARY_DIR}/config_private/
 )
 
 add_dependencies(master_config_structure master_config_header)
 
-
 target_link_libraries(master_proto nanopb)
-target_include_directories(master_proto PUBLIC ${CMAKE_BINARY_DIR}/protobuf)
+target_include_directories(master_proto public ${CMAKE_BINARY_DIR}/protobuf)
 
 # Generate code for the Msgpack config files
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/config)
+file(make_directory ${CMAKE_BINARY_DIR}/config)
 add_custom_command(
-    COMMAND tools/config/config_to_msgpack.py
-            --name=msgpack_config_order
-            config_order.yaml
+    command tools/config/config_to_msgpack.py --name=msgpack_config_order config_order.yaml
             ${CMAKE_BINARY_DIR}/config/config_order.c
-    OUTPUT ${CMAKE_BINARY_DIR}/config/config_order.c
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    MAIN_DEPENDENCY ../config_order.yaml
-    COMMENT "Generating Order config"
+    output ${CMAKE_BINARY_DIR}/config/config_order.c
+    working_directory ${PROJECT_SOURCE_DIR}
+    main_dependency ../config_order.yaml
+    comment "Generating Order config"
 )
 add_custom_command(
-    COMMAND tools/config/config_to_msgpack.py
-            --name=msgpack_config_chaos
-            config_chaos.yaml
+    command tools/config/config_to_msgpack.py --name=msgpack_config_chaos config_chaos.yaml
             ${CMAKE_BINARY_DIR}/config/config_chaos.c
-    OUTPUT ${CMAKE_BINARY_DIR}/config/config_chaos.c
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    MAIN_DEPENDENCY ../config_chaos.yaml
-    COMMENT "Generating Chaos config"
+    output ${CMAKE_BINARY_DIR}/config/config_chaos.c
+    working_directory ${PROJECT_SOURCE_DIR}
+    main_dependency ../config_chaos.yaml
+    comment "Generating Chaos config"
 )
 add_custom_command(
-    COMMAND tools/config/config_to_c.py
-            config_chaos.yaml
+    command tools/config/config_to_c.py config_chaos.yaml
             ${CMAKE_BINARY_DIR}/config/config_private.h
-    OUTPUT ${CMAKE_BINARY_DIR}/config/config_private.h
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    MAIN_DEPENDENCY ../config_chaos.yaml
-    COMMENT "Generating config structure"
+    output ${CMAKE_BINARY_DIR}/config/config_private.h
+    working_directory ${PROJECT_SOURCE_DIR}
+    main_dependency ../config_chaos.yaml
+    comment "Generating config structure"
 )
-add_library(config_data
-    ${CMAKE_BINARY_DIR}/config/config_order.c
-    ${CMAKE_BINARY_DIR}/config/config_chaos.c
+add_library(
+    config_data ${CMAKE_BINARY_DIR}/config/config_order.c ${CMAKE_BINARY_DIR}/config/config_chaos.c
 )
-target_include_directories(config_data PUBLIC ${CMAKE_BINARY_DIR}/config)
+target_include_directories(config_data public ${CMAKE_BINARY_DIR}/config)
 
-add_executable(master-firmware
+add_executable(
+    master-firmware
     src/main.cpp
     src/debug/log.c
     src/can/uavcan_node.cpp
@@ -172,76 +160,74 @@ add_executable(master-firmware
     src/gui/MenuPage.cpp
 )
 
-target_link_libraries(master-firmware PUBLIC
-    absl::strings
-    absl::flags
-    absl::flags_parse
-    error
-    uavcan
-    uavcan_linux
-    msgbus
-    msgbus_posix
-    Threads::Threads
-    master_lib
-    parameter
-    ugfx
-    config_data
-    master_config_structure
+target_link_libraries(
+    master-firmware
+    public absl::strings
+           absl::flags
+           absl::flags_parse
+           error
+           uavcan
+           uavcan_linux
+           msgbus
+           msgbus_posix
+           Threads::Threads
+           master_lib
+           parameter
+           ugfx
+           config_data
+           master_config_structure
 )
 
-target_include_directories(master-firmware PUBLIC src
+target_include_directories(master-firmware public src)
+
+add_custom_target(
+    master-firmware.ipk
+    command ${CMAKE_CURRENT_SOURCE_DIR}/../tools/build_opkg_package.py --name master-firmware
+            --output master-firmware.ipk master-firmware:/usr/local/bin/cvra-master
+    depends master-firmware
+    comment "Packaging master-firmware.ipk"
 )
 
-add_custom_target(master-firmware.ipk
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../tools/build_opkg_package.py
-    --name master-firmware
-    --output master-firmware.ipk
-    master-firmware:/usr/local/bin/cvra-master
-    DEPENDS master-firmware
-    COMMENT "Packaging master-firmware.ipk"
-)
+add_library(gfxconf interface)
+target_include_directories(gfxconf interface ../ugfx_demo)
 
-add_library(gfxconf INTERFACE)
-target_include_directories(gfxconf INTERFACE
-    ../ugfx_demo
-)
-
-if (APPLE) # MacOS
+if(APPLE) # MacOS
     add_definitions(-DGFX_USE_OS_OSX=GFXON)
-elseif (UNIX) # Linux
+elseif(UNIX) # Linux
     add_definitions(-DGFX_USE_OS_LINUX=GFXON)
 else()
-    message(FATAL_ERROR "Supported platforms: Linux and MacOS")
+    message(fatal_error "Supported platforms: Linux and MacOS")
 endif()
 
-target_include_directories(ugfx PUBLIC ../lib/ugfx/drivers/multiple/SDL)
+target_include_directories(ugfx public ../lib/ugfx/drivers/multiple/SDL)
 
-
-if (${CMAKE_CROSSCOMPILING} AND "${CVRA_BOARD_NAME}" STREQUAL "master")
+if(${CMAKE_CROSSCOMPILING} and "${CVRA_BOARD_NAME}" strequal "master")
     set(CHIBIOS_HALCONF_FILE src/halconf.h)
     set(CHIBIOS_CHCONF_FILE src/chconf.h)
     set(CHIBIOS_ROOT ../lib/ChibiOS)
-    find_package(ChibiOS COMPONENTS
-        rt
-        hal
-        streams
-        shell
-        cppwrappers
-        evtimer
-    REQUIRED)
+    find_package(
+        ChibiOS
+        components rt
+                   hal
+                   streams
+                   shell
+                   cppwrappers
+                   evtimer
+                   REQUIRED
+    )
 
     add_library(chibios ${ChibiOS_SOURCES})
-    target_include_directories(chibios PUBLIC
-        ${ChibiOS_INCLUDE_DIRS}
-        src # for chconf
-        src/board # for board.h
+    target_include_directories(
+        chibios public ${ChibiOS_INCLUDE_DIRS} src # for chconf
+                       src/board # for board.h
     )
-    target_compile_definitions(chibios PRIVATE -DSHELL_CONFIG_FILE)
+    target_compile_definitions(chibios private -DSHELL_CONFIG_FILE)
     target_link_libraries(chibios fatfs_conf)
 
-    add_executable(master-firmware.elf
-        #src/adafruit_display_driver/board_hx8357.c
-        #src/adafruit_display_driver/gdisp_lld_hx8357.c
+    add_executable(
+        master-firmware.elf
+        # src/adafruit_display_driver/board_hx8357.c
+        # src/adafruit_display_driver/gdisp_lld_hx8357.c
         src/ally_position_service.c
         src/base/base_controller.cpp
         src/base/cs_port.c
@@ -286,14 +272,11 @@ if (${CMAKE_CROSSCOMPILING} AND "${CVRA_BOARD_NAME}" STREQUAL "master")
         src/udp_topic_broadcaster.c
         src/uid.c
         src/usbconf.c
-
         # TODO: Should this be in its own library ?
         ../lib/ChibiOS/os/various/fatfs_bindings/fatfs_diskio.c
         ../lib/ChibiOS/os/various/fatfs_bindings/fatfs_syscall.c
-
         # TODO: This cannot go in a lib because of linking order issues
         ../lib/chibios-syscalls/newlib_syscalls.c
-
         # TODO: Those files should be unit tested but depend on injecting fake
         # header files, which is harder to do now with cmake
         src/base/map.c
@@ -301,7 +284,8 @@ if (${CMAKE_CROSSCOMPILING} AND "${CVRA_BOARD_NAME}" STREQUAL "master")
         src/robot_helpers/strategy_helpers.c
     )
 
-    target_link_libraries(master-firmware.elf
+    target_link_libraries(
+        master-firmware.elf
         chibios
         chibios-syscalls
         parameter
@@ -326,45 +310,30 @@ if (${CMAKE_CROSSCOMPILING} AND "${CVRA_BOARD_NAME}" STREQUAL "master")
         config_data
         ugfx
         adafruit_display_driver
-
         # touchscreen driver
         stmpe610_driver
     )
 
-    add_library(lwipopt INTERFACE)
-    target_include_directories(lwipopt INTERFACE src/)
-    target_link_libraries(lwipopt INTERFACE chibios)
+    add_library(lwipopt interface)
+    target_include_directories(lwipopt interface src/)
+    target_link_libraries(lwipopt interface chibios)
 
-    add_library(gfxconf INTERFACE)
-    target_include_directories(gfxconf INTERFACE
-        src/
-        src/adafruit_display_driver/
-    )
+    add_library(gfxconf interface)
+    target_include_directories(gfxconf interface src/ src/adafruit_display_driver/)
 
-    add_library(adafruit_display_driver
-        src/adafruit_display_driver/gdisp_lld_hx8357.c
-        src/adafruit_display_driver/board_hx8357.c
+    add_library(
+        adafruit_display_driver src/adafruit_display_driver/gdisp_lld_hx8357.c
+                                src/adafruit_display_driver/board_hx8357.c
     )
 
     target_link_libraries(adafruit_display_driver ugfx)
 
-    add_library(lwip_bindings
-        src/lwip_bindings/lwipthread.c
-        src/lwip_bindings/arch/sys_arch.c
-    )
+    add_library(lwip_bindings src/lwip_bindings/lwipthread.c src/lwip_bindings/arch/sys_arch.c)
 
-    target_include_directories(lwip_bindings PUBLIC src/lwip_bindings)
-    target_link_libraries(lwip_bindings PUBLIC
-        chibios
-        crc
-        error
-        lwip
-        parameter
-    )
+    target_include_directories(lwip_bindings public src/lwip_bindings)
+    target_link_libraries(lwip_bindings public chibios crc error lwip parameter)
 
-    target_include_directories(master-firmware.elf PUBLIC src)
+    target_include_directories(master-firmware.elf public src)
 
     stm32_set_linker_script(master-firmware.elf linker/STM32F429xI.ld)
 endif()
-
-

@@ -1,22 +1,22 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(version 3.10)
 project(cvra-build)
 
 set(CMAKE_CXX_STANDARD 14)
 
 set(UGFX ../lib/ugfx)
 
-find_package(SDL2 REQUIRED)
+find_package(SDL2 required)
 
 include_directories(.)
 include_directories(../master-firmware/src/)
 include_directories(${SDL2_INCLUDE_DIRS})
 
-if (APPLE) # MacOS
+if(APPLE) # MacOS
     add_definitions(-DGFX_USE_OS_OSX=GFXON)
-elseif (UNIX) # Linux
+elseif(UNIX) # Linux
     add_definitions(-DGFX_USE_OS_LINUX=GFXON)
 else()
-    message(FATAL_ERROR "Supported platforms: Linux and MacOS")
+    message(fatal_error "Supported platforms: Linux and MacOS")
 endif()
 
 add_definitions(-DGFX_OS_PRE_INIT_FUNCTION=sdl_driver_init)
@@ -82,27 +82,25 @@ set(SOURCES
     ${UGFX}/drivers/multiple/SDL/gdisp_lld_SDL.c
 )
 
-if (APPLE) # MacOS
+if(APPLE) # MacOS
     set(SOURCES ${SOURCES} ${UGFX}/src/gos/gos_osx.c)
-elseif (UNIX) # Linux
+elseif(UNIX) # Linux
     set(SOURCES ${SOURCES} ${UGFX}/src/gos/gos_linux.c)
 else()
-    message(FATAL_ERROR "Supported platforms: Linux and MacOS")
+    message(fatal_error "Supported platforms: Linux and MacOS")
 endif()
 
 add_library(ugfx ${SOURCES})
 
-target_include_directories(ugfx PUBLIC ${UGFX} ${UGFX}/src ${UGFX}/drivers/multiple/SDL)
+target_include_directories(ugfx public ${UGFX} ${UGFX}/src ${UGFX}/drivers/multiple/SDL)
 target_link_libraries(ugfx ${SDL2_LIBRARIES})
 
-add_executable(simulator
-    main.cpp
-    ../master-firmware/src/gui/Menu.cpp
-    ../master-firmware/src/gui/MenuPage.cpp
+add_executable(
+    simulator main.cpp ../master-firmware/src/gui/Menu.cpp ../master-firmware/src/gui/MenuPage.cpp
 )
 
 target_link_libraries(simulator ugfx)
 
-if (UNIX AND NOT APPLE)
+if(UNIX and not APPLE)
     target_link_libraries(simulator pthread)
 endif()

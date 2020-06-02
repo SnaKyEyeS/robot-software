@@ -1,11 +1,11 @@
-add_library(cmp
-cmp.c
+add_library(cmp cmp.c)
 
-)
+target_include_directories(cmp public include)
 
-target_include_directories(cmp PUBLIC include)
-
-cvra_add_test(TARGET cmp_test SOURCES 
+cvra_add_test(
+    TARGET
+    cmp_test
+    SOURCES
     test/buf.c
     test/utils.c
     test/test.c

@@ -1,5 +1,6 @@
-if (${CMAKE_CROSSCOMPILING})
-    add_library(lwip
+if(${CMAKE_CROSSCOMPILING})
+    add_library(
+        lwip
         lwip/src/api/api_lib.c
         lwip/src/api/api_msg.c
         lwip/src/api/err.c
@@ -78,6 +79,6 @@ if (${CMAKE_CROSSCOMPILING})
         lwip/src/netif/slipif.c
     )
 
-    target_include_directories(lwip PUBLIC lwip/src/include)
+    target_include_directories(lwip public lwip/src/include)
     target_link_libraries(lwip lwipopt lwip_bindings)
 endif()

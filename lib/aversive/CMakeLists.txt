@@ -1,4 +1,5 @@
-add_library(aversive
+add_library(
+    aversive
     blocking_detection_manager/blocking_detection_manager.c
     control_system_manager/control_system_manager.c
     math/geometry/circles.c
@@ -16,10 +17,13 @@ add_library(aversive
     trajectory_manager/trajectory_manager_utils.c
 )
 
-target_include_directories(aversive PUBLIC include)
+target_include_directories(aversive public include)
 target_link_libraries(aversive error quadramp)
 
-cvra_add_test(TARGET aversive_test SOURCES
+cvra_add_test(
+    TARGET
+    aversive_test
+    SOURCES
     tests/test_blocking_detection_manager.cpp
     tests/test_geometry_discrete_circles.cpp
     tests/test_geometry_polygon_intersection.cpp

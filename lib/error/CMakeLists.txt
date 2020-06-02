@@ -1,11 +1,5 @@
-add_library(error
-    error.c
-)
+add_library(error error.c)
 
-target_include_directories(error PUBLIC include)
+target_include_directories(error public include)
 
-cvra_add_test(TARGET error_test SOURCES 
-    tests/error.cpp
-    DEPENDENCIES
-    error
-)
+cvra_add_test(TARGET error_test SOURCES tests/error.cpp DEPENDENCIES error)

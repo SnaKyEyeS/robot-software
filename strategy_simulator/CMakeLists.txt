@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(version 3.10)
 project(cvra_strategy_simulator)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -41,17 +41,13 @@ set(SOURCES
     ../lib/parameter/parameter.c
 )
 
-add_executable(simulator ${SOURCES} )
-target_include_directories(simulator
-    PUBLIC
-        .
-        ../master-firmware/src/
-        ../master-firmware/build/
-        ../lib/
-        ../lib/nanopb/nanopb/
+add_executable(simulator ${SOURCES})
+target_include_directories(
+    simulator public . ../master-firmware/src/ ../master-firmware/build/ ../lib/
+                     ../lib/nanopb/nanopb/
 )
 target_link_libraries(simulator ${SDL2_LIBRARIES})
 
-if (UNIX AND NOT APPLE)
+if(UNIX and not APPLE)
     target_link_libraries(simulator pthread)
 endif()

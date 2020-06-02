@@ -1,11 +1,11 @@
-add_library(crc
-crc32.c
-crc16.c
-)
+add_library(crc crc32.c crc16.c)
 
-target_include_directories(crc PUBLIC include)
+target_include_directories(crc public include)
 
-cvra_add_test(TARGET crc_test SOURCES 
+cvra_add_test(
+    TARGET
+    crc_test
+    SOURCES
     test/crc32_test.cpp
     test/crc16_test.cpp
     DEPENDENCIES

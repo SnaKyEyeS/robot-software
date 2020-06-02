@@ -1,6 +1,5 @@
 project(cvra)
-cmake_minimum_required(VERSION 3.10)
-
+cmake_minimum_required(version 3.10)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(cvra)
@@ -13,15 +12,14 @@ set(CMAKE_CXX_STANDARD 14)
 enable_language(ASM)
 
 # Allow us to have colored text
-option (FORCE_COLORED_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." TRUE)
-if (${FORCE_COLORED_OUTPUT})
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-       add_compile_options (-fdiagnostics-color=always)
-    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-       add_compile_options (-fcolor-diagnostics)
-    endif ()
-endif ()
-
+option(FORCE_COLORED_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." TRUE)
+if(${FORCE_COLORED_OUTPUT})
+    if("${CMAKE_CXX_COMPILER_ID}" strequal "GNU")
+        add_compile_options(-fdiagnostics-color=always)
+    elseif("${CMAKE_CXX_COMPILER_ID}" strequal "Clang")
+        add_compile_options(-fcolor-diagnostics)
+    endif()
+endif()
 
 # enable all useful warnings
 add_c_cxx_compiler_flag("-Wall")
