@@ -11,6 +11,7 @@
 #include "absl/flags/usage.h"
 #include "motor_board_emulator.h"
 #include "wheel_encoders_emulator.h"
+#include "ProximityBeaconEmulator.h"
 #include <error/error.h>
 #include "logging.h"
 #include "viewer.h"
@@ -217,10 +218,12 @@ int main(int argc, char** argv)
     UavcanMotorEmulator left_motor(iface, "left-wheel", board_id++);
     UavcanMotorEmulator right_motor(iface, "right-wheel", board_id++);
     WheelEncoderEmulator wheels(iface, "encoders", board_id++);
+    ProximityBeaconEmulator proximity_beacon(iface, "proximity-beacon", board_id++);
 
     right_motor.start();
     left_motor.start();
     wheels.start();
+    proximity_beacon.start();
 
     auto cups = create_cups(world);
 
@@ -240,11 +243,14 @@ int main(int argc, char** argv)
 
             world.Step(dt, velocityIterations, posIterations);
 
+            // Publish wheel encoders
             robot.AccumulateWheelEncoders(dt);
-
             int left, right;
             robot.GetWheelEncoders(left, right);
             wheels.set_encoders(-left, right);
+
+            // Publish beacon signal
+            proximity_beacon.set_positions(robot.GetPosition(), robot.GetAngle(), opponent.GetPosition());
 
             auto pos = robot.GetPosition();
             auto vel = robot.GetLinearVelocity();

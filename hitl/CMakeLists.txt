@@ -16,6 +16,7 @@ add_executable(motor_board_emulator
     wheel_encoders_emulator.cpp
     viewer.cpp
     png_loader.cpp
+    ProximityBeaconEmulator.cpp
 )
 
 target_link_libraries(motor_board_emulator
